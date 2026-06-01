@@ -47,7 +47,7 @@ def format_mission_text(
     timer=None
 ):
     prefix = f"[SD:{timer}]\n" if self_destruct else ""
-    return f"""{prefix}Target    : {target}
+    return f"""{prefix}Target   : {target}
 Location : {location}
 Mission  : {mission}
 """
