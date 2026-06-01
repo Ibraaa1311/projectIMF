@@ -298,18 +298,12 @@ def decrypt_rsa(ciphertext_hex, private_key_pem):
 # =========================
 # Membuat digital signature dari pesan menggunakan RSA-PSS + SHA256
 def sign_message(message: str, private_key_pem: str) -> str:
-    """
-    Membuat digital signature dari pesan menggunakan RSA-PSS + SHA256.
-    Private key dalam format PEM digunakan untuk menandatangani pesan.
-    Mengembalikan signature dalam format hexadecimal string.
-    """
     # Muat private key dari string PEM
     private_key = serialization.load_pem_private_key(
         private_key_pem.encode(),
         password=None
     )
     # Buat signature menggunakan RSA-PSS dengan hash SHA256
-    # PSS (Probabilistic Signature Scheme) lebih aman dibanding PKCS1v15
     signature = private_key.sign(
         message.encode(),
         padding.PSS(
@@ -323,10 +317,6 @@ def sign_message(message: str, private_key_pem: str) -> str:
 
 # Memverifikasi keaslian digital signature
 def verify_signature(message: str, signature_hex: str, public_key_pem: str) -> bool:
-    """
-    Memverifikasi digital signature menggunakan RSA public key.
-    Mengembalikan True jika signature valid, False jika tidak valid atau pesan dimodifikasi.
-    """
     try:
         # Muat public key dari string PEM
         public_key = serialization.load_pem_public_key(public_key_pem.encode())
@@ -353,7 +343,7 @@ def verify_signature(message: str, signature_hex: str, public_key_pem: str) -> b
 st.set_page_config(layout="wide")
 
 # Custom CSS untuk Material Design 3 theme seperti tes.html
-CSS_FILE = Path(__file__).with_name("v2.css")
+CSS_FILE = Path(__file__).with_name("style.css")
 
 # Memuat custom CSS
 def load_custom_css(css_file=CSS_FILE):
