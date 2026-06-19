@@ -129,6 +129,74 @@ def create_bit_planes(image):
     gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     return [((gray_image >> bit_index) & 1) * 255 for bit_index in range(8)]
 
+# Membuat histogram bergaya HUD agar konsisten dengan tema aplikasi.
+def create_histogram_figure(original_image, stego_image):
+    channel_styles = [
+        ("Blue", "#4da3ff", 0),
+        ("Green", "#00ff88", 1),
+        ("Red", "#ff3333", 2),
+    ]
+
+    fig, ax = plt.subplots(figsize=(11, 4.8), dpi=140)
+    fig.patch.set_facecolor("#050a0f")
+    ax.set_facecolor("#080d12")
+
+    for channel_name, color, channel_index in channel_styles:
+        original_hist = cv2.calcHist(
+            [original_image], [channel_index], None, [256], [0, 256]
+        ).ravel()
+        stego_hist = cv2.calcHist(
+            [stego_image], [channel_index], None, [256], [0, 256]
+        ).ravel()
+
+        ax.plot(
+            original_hist,
+            color=color,
+            linestyle=(0, (5, 4)),
+            linewidth=1.2,
+            alpha=0.48,
+            label=f"Original {channel_name}",
+        )
+        ax.plot(
+            stego_hist,
+            color=color,
+            linewidth=1.9,
+            alpha=0.95,
+            label=f"Stego {channel_name}",
+        )
+
+    ax.set_title(
+        "RGB CHANNEL DISTRIBUTION",
+        color="#ff3333",
+        fontsize=13,
+        fontweight="bold",
+        pad=14,
+        fontfamily="monospace",
+    )
+    ax.set_xlabel("Pixel Intensity (0-255)", color="#ff8888", labelpad=10)
+    ax.set_ylabel("Frequency", color="#ff8888", labelpad=10)
+    ax.set_xlim(0, 255)
+    ax.grid(True, color="#ff3333", alpha=0.16, linewidth=0.8)
+
+    for spine in ax.spines.values():
+        spine.set_color("#ff3333")
+        spine.set_linewidth(1.1)
+
+    ax.tick_params(colors="#ffb3ac", labelsize=8)
+    legend = ax.legend(
+        loc="upper right",
+        ncol=2,
+        fontsize=7,
+        frameon=True,
+        facecolor="#121416",
+        edgecolor="#ff3333",
+    )
+    for text in legend.get_texts():
+        text.set_color("#ffb3ac")
+
+    fig.tight_layout(pad=1.4)
+    return fig
+
 # Badge HTML untuk menilai kualitas gambar berdasarkan metrik steganografi
 def create_rating_badge(label, css_class):
     return f"<div class='rating-badge {css_class}'>{label}</div>"
@@ -602,12 +670,10 @@ elif st.session_state.selected_module == "quality":
 
         # Tampil histogram
         st.subheader("Histogram")
-        fig, ax = plt.subplots()
-        for i in range(3):
-            ax.plot(cv2.calcHist([img1],[i],None,[256],[0,256]), linestyle='--')
-            ax.plot(cv2.calcHist([img2],[i],None,[256],[0,256]))
+        fig = create_histogram_figure(img1, img2)
         st.pyplot(fig)
         plt.close(fig)
+        st.markdown("</div>", unsafe_allow_html=True)
 
         # Tampil bit-plane
         st.subheader("Bit Plane")
